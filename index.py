@@ -8,10 +8,9 @@ from langchain.llms.openai import OpenAI
 
 # Define a simple Streamlit app
 st.title("Ask the DECTRIS digital assistant!")
-query = st.text_input("What would you like to ask about our detectors?", "")
 
-# If the 'Submit' button is clicked
-if st.button("Submit"):
+# If the 'Load' button is clicked
+if st.button("Load"):
     if not query.strip():
         st.error(f"Please provide the search query.")
     else:
@@ -30,7 +29,18 @@ if st.button("Submit"):
             documents = SimpleDirectoryReader('data').load_data()
             service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             index = GPTSimpleVectorIndex.from_documents(documents, service_context=service_context)
-            
+            index.storage_context.persist()
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+
+query = st.text_input("What would you like to ask about our detectors?", "")
+
+# If the 'Submit' button is clicked
+if st.button("Submit"):
+    if not query.strip():
+        st.error(f"Please provide the search query.")
+    else:
+        try:
             response = index.query(query)
             st.success(response)
         except Exception as e:
