@@ -26,7 +26,6 @@ if st.button("Load"):
             documents = SimpleDirectoryReader('data').load_data()
             service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             index = GPTSimpleVectorIndex.from_documents(documents, service_context=service_context)
-            index.storage_context.persist()
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
