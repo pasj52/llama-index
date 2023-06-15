@@ -11,9 +11,6 @@ st.title("Ask the DECTRIS digital assistant!")
 
 # If the 'Load' button is clicked
 if st.button("Load"):
-    if not query.strip():
-        st.error(f"Please provide the search query.")
-    else:
         try:
             # This example uses text-davinci-003 by default; feel free to change if desired
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003"))
