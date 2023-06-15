@@ -3,8 +3,7 @@ import os, streamlit as st
 # Uncomment to specify your OpenAI API key here (local testing only, not in production!), or add corresponding environment variable (recommended)
 # os.environ['OPENAI_API_KEY']= ""
 
-from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader, LLMPredictor, PromptHelper, ServiceContext
-from langchain.llms.openai import OpenAI
+from llama_index import VectorStoreIndex, SimpleDirectoryReader
 
 # Define a simple Streamlit app
 st.title("Ask the DECTRIS digital assistant!")
@@ -12,20 +11,15 @@ st.title("Ask the DECTRIS digital assistant!")
 # If the 'Load' button is clicked
 if st.button("Load"):
         try:
-            # This example uses text-davinci-003 by default; feel free to change if desired
-            llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="text-davinci-003"))
-
             # Configure prompt parameters and initialise helper
             max_input_size = 4096
             num_output = 256
             max_chunk_overlap = 20
-
-            prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
-
+                
             # Load documents from the 'data' directory
-            documents = SimpleDirectoryReader('data').load_data()
-            service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-            index = GPTSimpleVectorIndex.from_documents(documents, service_context=service_context)
+            documents = SimpleDirectoryReader('data_development').load_data()
+            index = VectorStoreIndex.from_documents(documents)
+            index.storage_context.persist()
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
@@ -37,7 +31,8 @@ if st.button("Submit"):
         st.error(f"Please provide the search query.")
     else:
         try:
-            response = index.query(query)
+            query_engine = index.as_query_engine()
+            response = query_engine.query(query).response
             st.success(response)
         except Exception as e:
             st.error(f"An error occurred: {e}")
